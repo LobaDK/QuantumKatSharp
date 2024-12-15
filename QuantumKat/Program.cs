@@ -1,12 +1,12 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using System.Threading.Tasks;
+using QuantumKat.Utitlity;
 
 namespace QuantumKat;
 
 class Program
 {
-    private static DiscordSocketClient _client;
+    private static DiscordSocketClient? _client;
 
     public static async Task Main(string[] args)
     {
@@ -19,17 +19,22 @@ class Program
 
         _client.Log += LogAsync;
         _client.Ready += ReadyAsync;
+
+        // TODO: Add dynamic way to control token type through external factors such as .vscode/launch.json and/or application config.
+        await _client.LoginAsync(TokenType.Bot, await new TokenLoader("dev").LoadWith1Password());
+        await _client.StartAsync();
+        await Task.Delay(Timeout.Infinite);
     }
 
     private static Task ReadyAsync()
     {
-        System.Console.WriteLine();
+        Console.WriteLine();
         return Task.CompletedTask;
     }
 
     private static Task LogAsync(LogMessage message)
     {
-        System.Console.WriteLine(message.ToString());
+        Console.WriteLine(message.ToString());
         return Task.CompletedTask;
     }
 }
