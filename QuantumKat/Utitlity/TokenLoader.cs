@@ -5,6 +5,7 @@ namespace QuantumKat.Utitlity;
 public class TokenLoader
 {
     private readonly string _tokenType;
+    private static readonly string[] _tokenTypes = ["main", "dev"];
 
     /// <summary>
     /// Constructs a new TokenLoader object with the given token type to use
@@ -13,7 +14,7 @@ public class TokenLoader
     /// <exception cref="ArgumentException">Thrown if the value is not "main" or "dev".</exception>
     public TokenLoader(string tokenType)
     {
-        if (!new[] {"main", "dev"}.Contains(tokenType))
+        if (!_tokenTypes.Contains(tokenType))
         {
             throw new ArgumentException("tokenType may only be of the value \"main\" or \"dev\"");
         }
