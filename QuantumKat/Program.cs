@@ -4,6 +4,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using QuantumKat.Utitlity;
+using QuantumKat.Services;
 
 namespace QuantumKat;
 
@@ -17,26 +18,13 @@ class Program
         // TODO: Look into keeping commands in external DLL's which can be loaded, reloaded and unloaded on the go
 
         client.Log += LogAsync;
-        client.Ready += ReadyAsync;
-        // TODO: Make this cleaner. Dedicated method?
-        client.InteractionCreated += async (x) =>
-        {
-            SocketInteractionContext ctx = new(client, x);
-            await _services.GetRequiredService<InteractionService>().ExecuteCommandAsync(ctx, _services);
-        };
+
+        await _services.GetRequiredService<InteractionHandler>().InitializeAsync();
 
         // TODO: Add dynamic way to control token type through external factors. Thinking launch.json, appsettings/config and launch parameters
         await client.LoginAsync(TokenType.Bot, await new TokenLoader("dev").LoadWith1Password());
         await client.StartAsync();
         await Task.Delay(Timeout.Infinite);
-    }
-
-    private static async Task<Task> ReadyAsync()
-    {
-        InteractionService _interactionService = _services.GetRequiredService<InteractionService>();
-        await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
-        await _interactionService.RegisterCommandsToGuildAsync(665680289510588447);
-        return Task.CompletedTask;
     }
 
     private static Task LogAsync(LogMessage message)
@@ -61,7 +49,8 @@ class Program
                 | GatewayIntents.MessageContent
         })
         .AddSingleton<DiscordSocketClient>()
-        .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>(), new InteractionServiceConfig()));
+        .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>(), new InteractionServiceConfig()))
+        .AddSingleton<InteractionHandler>();
 
         return collection.BuildServiceProvider();
     }
