@@ -35,6 +35,11 @@ class Program
 
     private static ServiceProvider CreateServices()
     {
+        InteractionServiceConfig interactionServiceConfig = new()
+        {
+            UseCompiledLambda = true
+        };
+        
         IServiceCollection collection = new ServiceCollection()
         .AddSingleton(new DiscordSocketConfig
         {
@@ -49,7 +54,7 @@ class Program
                 | GatewayIntents.MessageContent
         })
         .AddSingleton<DiscordSocketClient>()
-        .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>(), new InteractionServiceConfig()))
+        .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>(), interactionServiceConfig))
         .AddSingleton<InteractionHandler>();
 
         return collection.BuildServiceProvider();
