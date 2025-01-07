@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Discord;
+﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +13,7 @@ class Program
     public static async Task Main(string[] args)
     {
         DiscordSocketClient client = _services.GetRequiredService<DiscordSocketClient>();
-        
+
         // TODO: Look into keeping commands in external DLL's which can be loaded, reloaded and unloaded on the go
 
         client.Log += LogAsync;
@@ -39,7 +38,7 @@ class Program
         {
             UseCompiledLambda = true
         };
-        
+
         IServiceCollection collection = new ServiceCollection()
         .AddSingleton(new DiscordSocketConfig
         {
