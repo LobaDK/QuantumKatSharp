@@ -15,18 +15,16 @@ public class UserInteractions(DiscordSocketClient client) : InteractionModuleBas
     public async Task Pet(
         [Summary(description: "The user to pet")]
         IUser user,
-        [Summary(description: "How many times they should be pet. Leave unselected to make it random. Must be between 1 and 100")] [MinValue(1)] [MaxValue(100)]
+        [Summary(description: "How many times they should be pet. Leave unselected to make it random. Must be between 1 and 100")]
+        [MinValue(1)] [MaxValue(100)]
         int amount = 0)
     {
         Random random = new();
+        
         if (amount == 0)
         {
             amount = random.Next(1, 100);
         }
-
-        string verb = amount == 1 ? "time" : "times";
-
-        string pets = $"pe{new('t', amount)}s";
 
         if (user.IsClient(client))
         {
@@ -35,9 +33,8 @@ public class UserInteractions(DiscordSocketClient client) : InteractionModuleBas
             // 45%
             if (x <= 0.45)
             {
-                int QuantumSpan = random.Next(0, 100);
-                string QuantumLocation = QuantumSpan == 1 ? QuantumLocationsSingular[random.Next(0, QuantumLocationsSingular.Length)] : QuantumLocationsPlural[random.Next(0, QuantumLocationsPlural.Length)];
-                await RespondAsync($"*Quantum purrs across {QuantumSpan} {QuantumLocation}*");
+                string QuantumLocation = amount == 1 ? QuantumLocationsSingular[random.Next(0, QuantumLocationsSingular.Length)] : QuantumLocationsPlural[random.Next(0, QuantumLocationsPlural.Length)];
+                await RespondAsync($"*Quantum purrs across {amount} {QuantumLocation}*");
             }
             // 45%
             else if (x <= 0.90)
@@ -61,6 +58,8 @@ public class UserInteractions(DiscordSocketClient client) : InteractionModuleBas
         }
         else
         {
+            string verb = amount == 1 ? "time" : "times";
+            string pets = $"pe{new('t', amount)}s";
             await RespondAsync($"Superpositions {amount} {verb} around {user.Mention} and *{pets}*");
         }
     }
