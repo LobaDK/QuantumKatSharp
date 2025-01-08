@@ -7,12 +7,21 @@ namespace QuantumKat.Services;
 
 public class InteractionHandler(DiscordSocketClient _client, InteractionService _interactionService, IServiceProvider _serviceProvider)
 {
+    // TODO: This should be stored and used in the global config instead
+    private readonly static string pluginPath = Path.Combine(Directory.GetCurrentDirectory(), "plugins");
     public async Task InitializeAsync()
     {
         _client.Ready += ReadyAsync;
         _interactionService.Log += LogAsync;
 
-        await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
+        // TODO: Improve external DLL loading. Require use of custom interface to ensure correct structure?
+        // TODO: Introduce commands or other form of control to load, unload, and reload DLLs.
+        foreach (string dll in Directory.GetFiles(pluginPath, "*.dll"))
+        {
+            // TODO: Make this a logged message
+            Console.WriteLine($"Loading {new FileInfo(dll).Name}");
+            await _interactionService.AddModulesAsync(Assembly.LoadFrom(dll), _serviceProvider);
+        }
 
         _client.InteractionCreated += HandleInteraction;
     }
@@ -23,6 +32,7 @@ public class InteractionHandler(DiscordSocketClient _client, InteractionService 
     }
     private async Task ReadyAsync()
     {
+        // TODO: Use the global config
         await _interactionService.RegisterCommandsToGuildAsync(665680289510588447);
     }
     private async Task HandleInteraction(SocketInteraction socketInteraction)

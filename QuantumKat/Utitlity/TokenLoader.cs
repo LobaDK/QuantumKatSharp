@@ -31,6 +31,7 @@ public class TokenLoader
     {
         // TODO: Implement config file to allow easily customizing the secret reference
         // TODO: Improve process handling, and check if the command "op" even exists
+        // TODO: Improve handling for if the user declines access
         Process process = CreateProcess(fileName: "op", args: $"read \"op://Programming and IT security/QuantumKat Discord bot/{_tokenType} token\"");
 
         process.Start();

@@ -10,8 +10,14 @@ namespace QuantumKat;
 class Program
 {
     private readonly static ServiceProvider _services = CreateServices();
+    private readonly static string pluginPath = Path.Combine(Directory.GetCurrentDirectory(), "plugins");
     public static async Task Main(string[] args)
     {
+        if (!Directory.Exists(pluginPath))
+        {
+            Directory.CreateDirectory(pluginPath);
+        }
+        
         DiscordSocketClient client = _services.GetRequiredService<DiscordSocketClient>();
 
         // TODO: Look into keeping commands in external DLL's which can be loaded, reloaded and unloaded on the go

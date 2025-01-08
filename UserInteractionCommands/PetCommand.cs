@@ -1,4 +1,4 @@
-using Discord;
+﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using QuantumKat.Extensions;
@@ -7,6 +7,7 @@ namespace QuantumKat.Commands;
 
 public class UserInteractions(DiscordSocketClient client) : InteractionModuleBase<SocketInteractionContext>
 {
+    // TODO: Use global configuration to avoid fields and allow "tuneable"-like modifying of values
     private readonly string[] QuantumLocationsPlural = ["dimensions", "universes", "realities", "timelines",];
     private readonly string[] QuantumLocationsSingular = ["dimension", "universe", "reality", "timeline",];
     private readonly string[] PetLoopChoices = ["pet", "pat", "petting", "patting"];
@@ -30,6 +31,7 @@ public class UserInteractions(DiscordSocketClient client) : InteractionModuleBas
         {
             float x = random.NextSingle();
 
+            // TODO: Store and retrieve the probability of each option in global config for "tuneable"-like modifications
             // 45%
             if (x <= 0.45)
             {
