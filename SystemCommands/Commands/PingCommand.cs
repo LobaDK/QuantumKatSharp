@@ -14,7 +14,7 @@ public class PingCommand(DiscordSocketClient client) : IPingCommand
     {
         string response = DeterminePingResponse(message);
         
-        if (measureLatency)
+        if (measureLatency && !response.StartsWith("Unknown command"))
         {
             int responseTime = GetLatency(messageCreatedAt)*2;
             int discordLatency = client.Latency;
