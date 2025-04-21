@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using QuantumKat.Utitlity;
 using QuantumKat.Services;
+using Discord.Commands;
 
 namespace QuantumKat;
 
@@ -60,7 +61,8 @@ class Program
         })
         .AddSingleton<DiscordSocketClient>()
         .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>(), interactionServiceConfig))
-        .AddSingleton<InteractionHandler>();
+        .AddSingleton<InteractionHandler>()
+        .AddSingleton<CommandService>();
 
         return collection.BuildServiceProvider();
     }
