@@ -14,4 +14,33 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
   </ItemGroup>
 
+  <Target Name="BuildDependencies"
+          AfterTargets="Build">
+    <Message Text="→ Also building SystemPlugin.dll and UserInteractionPlugin.dll …" Importance="high" />
+    <MSBuild
+      Projects="..\SystemCommands\SystemCommands.csproj;..\UserInteractionCommands\UserInteractionCommands.csproj"
+      Targets="Build"
+      Properties="Configuration=$(Configuration);
+                  Platform=$(Platform);
+                  BuildProjectReferences=false" />
+  </Target>
+
+  <Target Name="CopyPluginsPostBuild" AfterTargets="Build">
+    <PropertyGroup>
+      <OutputDir>$(OutputPath)</OutputDir>
+      <PluginOutputDir>$(OutputDir)plugins\</PluginOutputDir>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(PluginOutputDir)" />
+
+    <ItemGroup>
+      <PluginAssemblies Include="..\SystemCommands\bin\Debug\net8.0\SystemCommands.dll"/>
+      <PluginAssemblies Include="..\UserInteractionCommands\bin\Debug\net8.0\UserInteractionCommands.dll"/>
+    </ItemGroup>
+
+    <Copy SourceFiles="@(PluginAssemblies)"
+        DestinationFolder="$(PluginOutputDir)"
+        SkipUnchangedFiles="true" />
+  </Target>
+
 </Project>
