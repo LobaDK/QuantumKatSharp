@@ -1,6 +1,6 @@
 using Discord.Commands;
 using Discord.WebSocket;
-using QuantumKat.Commands;
+using SystemCommands.Commands;
 
 namespace SystemCommands.CommandInitiators.MessageCommands;
 

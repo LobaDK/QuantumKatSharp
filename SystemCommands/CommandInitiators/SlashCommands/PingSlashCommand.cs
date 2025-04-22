@@ -1,8 +1,6 @@
-using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
-using QuantumKat.Commands;
-using SystemCommands.Interfaces;
+using SystemCommands.Commands;
 
 namespace SystemCommands.CommandInitiators.SlashCommands;
 

@@ -1,5 +1,3 @@
-using Discord.WebSocket;
-
 namespace SystemCommands.Interfaces;
 
 public interface IPingCommand

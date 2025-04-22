@@ -3,7 +3,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using QuantumKat.Extensions;
 
-namespace QuantumKat.Commands;
+namespace UserInteractionCommands;
 
 public class UserInteractions(DiscordSocketClient client) : InteractionModuleBase<SocketInteractionContext>
 {

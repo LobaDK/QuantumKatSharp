@@ -1,7 +1,7 @@
 ﻿using Discord.WebSocket;
 using SystemCommands.Interfaces;
 
-namespace QuantumKat.Commands;
+namespace SystemCommands.Commands;
 
 public class PingCommand(DiscordSocketClient client) : IPingCommand
 {
