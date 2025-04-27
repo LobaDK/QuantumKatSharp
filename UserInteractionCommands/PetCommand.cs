@@ -1,11 +1,10 @@
 ﻿using Discord;
 using Discord.Interactions;
-using Discord.WebSocket;
 using QuantumKat.Extensions;
 
 namespace UserInteractionCommands;
 
-public class UserInteractions(DiscordSocketClient client) : InteractionModuleBase<SocketInteractionContext>
+public class UserInteractions() : InteractionModuleBase<SocketInteractionContext>
 {
     // TODO: Use global configuration to avoid fields and allow "tuneable"-like modifying of values
     private readonly string[] QuantumLocationsPlural = ["dimensions", "universes", "realities", "timelines",];
@@ -27,7 +26,7 @@ public class UserInteractions(DiscordSocketClient client) : InteractionModuleBas
             amount = random.Next(1, 100);
         }
 
-        if (user.IsClient(client))
+        if (user.IsClient())
         {
             float x = random.NextSingle();
 
