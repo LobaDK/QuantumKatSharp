@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using QuantumKat.Utitlity;
 using QuantumKat.Services;
 using Discord.Commands;
+using QuantumKat.Extensions;
 
 namespace QuantumKat;
 
@@ -26,6 +27,8 @@ class Program
         client.Log += LogAsync;
 
         await _services.GetRequiredService<InteractionHandler>().InitializeAsync();
+
+        DiscordUser.Initialize(client);
 
         // TODO: Add dynamic way to control token type through external factors. Thinking launch.json, appsettings/config and launch parameters
         await client.LoginAsync(TokenType.Bot, await new TokenLoader("dev").LoadWith1Password());
