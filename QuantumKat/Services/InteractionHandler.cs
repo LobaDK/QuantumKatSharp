@@ -3,11 +3,20 @@ using Discord;
 using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
+using QuantumKat.Extensions;
+using QuantumKat.Interfaces;
 
 namespace QuantumKat.Services;
 
-public class InteractionHandler(DiscordSocketClient _client, InteractionService _interactionService, IServiceProvider _serviceProvider, CommandService _commandService)
+public class InteractionHandler(DiscordSocketClient client, InteractionService interactionService, IServiceProvider serviceProvider, CommandService commandService)
 {
+    private readonly DiscordSocketClient _client = client;
+    private readonly InteractionService _interactionService = interactionService;
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly CommandService _commandService = commandService;
+
+    private readonly List<IMessageHandlerPlugin> _messageHandlerPlugins = [];
+
     // TODO: This should be stored and used in the global config instead
     private readonly static string pluginPath = Path.Combine(Directory.GetCurrentDirectory(), "plugins");
     
@@ -24,6 +33,17 @@ public class InteractionHandler(DiscordSocketClient _client, InteractionService 
             Console.WriteLine($"Loading {new FileInfo(dll).Name}");
             await _interactionService.AddModulesAsync(Assembly.LoadFrom(dll), _serviceProvider);
             await _commandService.AddModulesAsync(Assembly.LoadFrom(dll), _serviceProvider);
+
+            Assembly assembly = Assembly.LoadFrom(dll);
+            foreach(Type type in assembly.GetTypes())
+            {
+                if (typeof(IMessageHandlerPlugin).IsAssignableFrom(type))
+                {
+                    IMessageHandlerPlugin plugin = (IMessageHandlerPlugin)Activator.CreateInstance(type, _serviceProvider)!;
+                    _messageHandlerPlugins.Add(plugin);
+                }
+            }
+
         }
 
         _client.InteractionCreated += HandleInteraction;
@@ -63,7 +83,18 @@ public class InteractionHandler(DiscordSocketClient _client, InteractionService 
             return;
         }
 
+        if (message.Author.IsClient())
+        {
+            return;
+        }
+
         int argPos = 0;
+
+        // Notify any plugins that implemented the IMessageHandlerPlugin interface
+        foreach (IMessageHandlerPlugin plugin in _messageHandlerPlugins)
+        {
+            await plugin.HandleMessageAsync(message, argPos);
+        }
 
         if (!message.HasCharPrefix('?', ref argPos) || message.Author.IsBot)
         {
