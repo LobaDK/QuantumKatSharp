@@ -10,6 +10,7 @@
             "env": {
                 "TOKEN_TYPE": "${input:TOKEN_TYPE}"
             },
+            "logging": {"moduleLoad": false},
             "request": "launch",
             "preLaunchTask": "dotnet: build c:/Users/nickl/code/C#/QuantumKatSharp/QuantumKat/QuantumKat.csproj",
             "program": "${workspaceFolder}/QuantumKat/bin/Debug/net8.0/QuantumKat.dll"
