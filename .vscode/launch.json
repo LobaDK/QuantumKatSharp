@@ -22,10 +22,10 @@
             "id": "TOKEN_TYPE",
             "description": "Select the bot mode",
             "options": [
-                "Main",
-                "Dev"
+                "main",
+                "dev"
             ],
-            "default": "Main",
+            "default": "main",
         }
     ]
 }
