@@ -19,6 +19,8 @@ public class OpenAIPluginMessageHandler : IMessageHandlerPlugin
 
     public async Task HandleMessageAsync(SocketUserMessage message, int argPos)
     {
+        // Catches messages that start with "hey quantumkat" or "hey @quantumkat"
+        // including comma and space variations.
         string pattern = $@"^hey[, ]+(quantumkat|<@{_client.CurrentUser.Id}>)";
         if (Regex.IsMatch(message.Content, pattern, RegexOptions.IgnoreCase))
         {
