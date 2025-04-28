@@ -1,0 +1,30 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "C#: QuantumKat Debug",
+            "type": "coreclr",
+            "env": {
+                "TOKEN_TYPE": "${input:TOKEN_TYPE}"
+            },
+            "request": "launch",
+            "preLaunchTask": "dotnet: build c:/Users/nickl/code/C#/QuantumKatSharp/QuantumKat/QuantumKat.csproj",
+            "program": "${workspaceFolder}/QuantumKat/bin/Debug/net8.0/QuantumKat.dll"
+        }
+    ],
+    "inputs": [
+        {
+            "type": "pickString",
+            "id": "TOKEN_TYPE",
+            "description": "Select the bot mode",
+            "options": [
+                "Main",
+                "Dev"
+            ],
+            "default": "Main",
+        }
+    ]
+}
