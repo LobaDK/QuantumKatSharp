@@ -6,32 +6,63 @@ using QuantumKat.Utitlity;
 using QuantumKat.Services;
 using Discord.Commands;
 using QuantumKat.Extensions;
+using Microsoft.Extensions.Configuration;
+using QuantumKat.Settings;
+using QuantumKat.Settings.Model;
 
 namespace QuantumKat;
 
 class Program
 {
-    private readonly static ServiceProvider _services = CreateServices();
-    private readonly static string pluginPath = Path.Combine(Directory.GetCurrentDirectory(), "plugins");
     public static async Task Main(string[] args)
     {
-        if (!Directory.Exists(pluginPath))
-        {
-            Directory.CreateDirectory(pluginPath);
-        }
-        
-        DiscordSocketClient client = _services.GetRequiredService<DiscordSocketClient>();
+        SettingsManager settingsManager = new("config.ini");
+        IConfiguration configuration = settingsManager.GetConfiguration();
 
-        // TODO: Look into keeping commands in external DLL's which can be loaded, reloaded and unloaded on the go
+        RootSettings settings = new();
+        ConfigurationBinder.Bind(configuration, settings);
+
+        if (!Directory.Exists(settings.App.PluginPath))
+        {
+            Directory.CreateDirectory(settings.App.PluginPath);
+        }
+
+        DiscordSocketConfig socketConfig = new() {
+            GatewayIntents = GatewayIntents.Guilds
+            | GatewayIntents.GuildMembers
+            | GatewayIntents.GuildMessageReactions
+            | GatewayIntents.GuildMessages
+            | GatewayIntents.GuildMessageTyping
+            | GatewayIntents.DirectMessageReactions
+            | GatewayIntents.DirectMessages
+            | GatewayIntents.DirectMessageTyping
+            | GatewayIntents.MessageContent
+        };
+
+        DiscordSocketClient client = new(socketConfig);
 
         client.Log += LogAsync;
 
-        await _services.GetRequiredService<InteractionHandler>().InitializeAsync();
+        InteractionServiceConfig interactionServiceConfig = new() {
+            UseCompiledLambda = true
+        };
 
+        InteractionService interactionService = new(client, interactionServiceConfig);
+
+        IServiceCollection serviceCollection = new ServiceCollection();
+        serviceCollection.AddSingleton(configuration);
+        serviceCollection.AddSingleton(client);
+        serviceCollection.AddSingleton(interactionService);
+        serviceCollection.AddSingleton<InteractionHandler>();
+        serviceCollection.AddSingleton<CommandService>();
+
+        ServiceProvider services = serviceCollection.BuildServiceProvider();
+
+        await services.GetRequiredService<InteractionHandler>().InitializeAsync();
         DiscordUser.Initialize(client);
 
-        // TODO: Add dynamic way to control token type through external factors. Thinking launch.json, appsettings/config and launch parameters
-        await client.LoginAsync(TokenType.Bot, await new TokenLoader("dev").LoadWith1Password());
+        string bot_mode = Environment.GetEnvironmentVariable("TOKEN_TYPE") ?? "main";
+        await client.LoginAsync(TokenType.Bot, await new TokenLoader(bot_mode).LoadWith1Password());
         await client.StartAsync();
         await Task.Delay(Timeout.Infinite);
     }
@@ -40,33 +71,5 @@ class Program
     {
         Console.WriteLine(message.ToString());
         return Task.CompletedTask;
-    }
-
-    private static ServiceProvider CreateServices()
-    {
-        InteractionServiceConfig interactionServiceConfig = new()
-        {
-            UseCompiledLambda = true
-        };
-
-        IServiceCollection collection = new ServiceCollection()
-        .AddSingleton(new DiscordSocketConfig
-        {
-            GatewayIntents = GatewayIntents.Guilds
-                | GatewayIntents.GuildMembers
-                | GatewayIntents.GuildMessageReactions
-                | GatewayIntents.GuildMessages
-                | GatewayIntents.GuildMessageTyping
-                | GatewayIntents.DirectMessageReactions
-                | GatewayIntents.DirectMessages
-                | GatewayIntents.DirectMessageTyping
-                | GatewayIntents.MessageContent
-        })
-        .AddSingleton<DiscordSocketClient>()
-        .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>(), interactionServiceConfig))
-        .AddSingleton<InteractionHandler>()
-        .AddSingleton<CommandService>();
-
-        return collection.BuildServiceProvider();
     }
 }
