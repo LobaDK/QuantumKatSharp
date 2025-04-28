@@ -3,23 +3,35 @@ using Discord;
 using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using QuantumKat.Extensions;
 using QuantumKat.Interfaces;
+using QuantumKat.Settings.Model;
 
 namespace QuantumKat.Services;
 
-public class InteractionHandler(DiscordSocketClient client, InteractionService interactionService, IServiceProvider serviceProvider, CommandService commandService)
+public class InteractionHandler
 {
-    private readonly DiscordSocketClient _client = client;
-    private readonly InteractionService _interactionService = interactionService;
-    private readonly IServiceProvider _serviceProvider = serviceProvider;
-    private readonly CommandService _commandService = commandService;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly DiscordSocketClient _client;
+    private readonly InteractionService _interactionService;
+    private readonly CommandService _commandService;
+    private readonly IConfiguration _configuration;
+    private readonly RootSettings _settings = new();
+
+    public InteractionHandler(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+        _client = serviceProvider.GetRequiredService<DiscordSocketClient>();
+        _interactionService = serviceProvider.GetRequiredService<InteractionService>();
+        _commandService = serviceProvider.GetRequiredService<CommandService>();
+        _configuration = serviceProvider.GetRequiredService<IConfiguration>();
+        ConfigurationBinder.Bind(_configuration, _settings);
+    }
 
     private readonly List<IMessageHandlerPlugin> _messageHandlerPlugins = [];
 
-    // TODO: This should be stored and used in the global config instead
-    private readonly static string pluginPath = Path.Combine(Directory.GetCurrentDirectory(), "plugins");
-    
     public async Task InitializeAsync()
     {
         _client.Ready += ReadyAsync;
@@ -27,7 +39,7 @@ public class InteractionHandler(DiscordSocketClient client, InteractionService i
 
         // TODO: Improve external DLL loading. Require use of custom interface to ensure correct structure?
         // TODO: Introduce commands or other form of control to load, unload, and reload DLLs.
-        foreach (string dll in Directory.GetFiles(pluginPath, "*.dll"))
+        foreach (string dll in Directory.GetFiles(_settings.App.PluginPath, "*.dll"))
         {
             // TODO: Make this a logged message
             Console.WriteLine($"Loading {new FileInfo(dll).Name}");
@@ -58,8 +70,29 @@ public class InteractionHandler(DiscordSocketClient client, InteractionService i
     
     private async Task ReadyAsync()
     {
-        // TODO: Use the global config
-        await _interactionService.RegisterCommandsToGuildAsync(665680289510588447);
+        foreach (string guildToSyncTo in _settings.Discord.GuildsToSyncTo)
+        {
+            ulong guild_id = ulong.Parse(guildToSyncTo);
+            if (guildToSyncTo.Length == 18)
+            {
+                SocketGuild guild = _client.GetGuild(guild_id);
+                Console.WriteLine($"Registering commands to guild {guild.Name} ({guild.Id})");
+                await _interactionService.RegisterCommandsToGuildAsync(guild_id);
+            }
+            else if (guildToSyncTo.Length == 19)
+            {
+                IChannel channel = await _client.GetChannelAsync(guild_id);
+                if (channel is SocketTextChannel textChannel)
+                {
+                    Console.WriteLine($"Registering commands to channel {textChannel.Name} ({textChannel.Id})");
+                    await _interactionService.RegisterCommandsToGuildAsync(textChannel.Guild.Id);
+                }
+                else
+                {
+                    Console.WriteLine($"Unable to register commands to channel {guild_id}. Channel is not a text channel.");
+                }
+            }
+        }
     }
     
     private async Task HandleInteraction(SocketInteraction socketInteraction)
@@ -83,6 +116,7 @@ public class InteractionHandler(DiscordSocketClient client, InteractionService i
             return;
         }
 
+        // Ignore messages from the bot itself
         if (message.Author.IsClient())
         {
             return;
@@ -96,6 +130,7 @@ public class InteractionHandler(DiscordSocketClient client, InteractionService i
             await plugin.HandleMessageAsync(message, argPos);
         }
 
+        // Ignore messages that don't start with the command prefix or are from bots
         if (!message.HasCharPrefix('?', ref argPos) || message.Author.IsBot)
         {
             return;
