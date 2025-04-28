@@ -9,13 +9,27 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discord.Net" Version="3.17.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
+    <PackageReference Include="Discord.Net" Version="3.17.4"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.4"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.4"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="9.0.4"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.4"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.4"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="config.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <Target Name="BuildDependencies" AfterTargets="Build">
-    <MSBuild Projects="..\SystemCommands\SystemCommands.csproj;..\UserInteractionCommands\UserInteractionCommands.csproj;..\OpenAICommands\OpenAICommands.csproj" Targets="Build" Properties="Configuration=$(Configuration);&#xD;&#xA;                  Platform=$(Platform);&#xD;&#xA;                  BuildProjectReferences=false" />
+    <MSBuild Projects="..\SystemCommands\SystemCommands.csproj;..\UserInteractionCommands\UserInteractionCommands.csproj;..\OpenAICommands\OpenAICommands.csproj" Targets="Build" Properties="Configuration=$(Configuration);
+                  Platform=$(Platform);
+                  BuildProjectReferences=false"/>
   </Target>
 
   <Target Name="CopyPluginsPostBuild" AfterTargets="Build">
@@ -23,16 +37,13 @@
       <OutputDir>$(OutputPath)</OutputDir>
       <PluginOutputDir>$(OutputDir)plugins\</PluginOutputDir>
     </PropertyGroup>
-
-    <MakeDir Directories="$(PluginOutputDir)" />
-
+    <MakeDir Directories="$(PluginOutputDir)"/>
     <ItemGroup>
-      <PluginAssemblies Include="..\SystemCommands\bin\Debug\net8.0\SystemCommands.dll" />
-      <PluginAssemblies Include="..\UserInteractionCommands\bin\Debug\net8.0\UserInteractionCommands.dll" />
-      <PluginAssemblies Include="..\OpenAICommands\bin\Debug\net8.0\OpenAICommands.dll" />
+      <PluginAssemblies Include="..\SystemCommands\bin\Debug\net8.0\SystemCommands.dll"/>
+      <PluginAssemblies Include="..\UserInteractionCommands\bin\Debug\net8.0\UserInteractionCommands.dll"/>
+      <PluginAssemblies Include="..\OpenAICommands\bin\Debug\net8.0\OpenAICommands.dll"/>
     </ItemGroup>
-
-    <Copy SourceFiles="@(PluginAssemblies)" DestinationFolder="$(PluginOutputDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PluginAssemblies)" DestinationFolder="$(PluginOutputDir)" SkipUnchangedFiles="true"/>
   </Target>
 
 </Project>
