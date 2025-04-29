@@ -12,7 +12,8 @@
             },
             "logging": {"moduleLoad": false},
             "request": "launch",
-            "preLaunchTask": "dotnet: build c:/Users/nickl/code/C#/QuantumKatSharp/QuantumKat/QuantumKat.csproj",
+            "cwd": "${workspaceFolder}/QuantumKat",
+            "preLaunchTask": "dotnet: build",
             "program": "${workspaceFolder}/QuantumKat/bin/Debug/net8.0/QuantumKat.dll"
         }
     ],
