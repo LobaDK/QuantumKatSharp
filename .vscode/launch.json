@@ -12,6 +12,7 @@
             },
             "logging": {"moduleLoad": false},
             "request": "launch",
+            "externalConsole": true,
             "cwd": "${workspaceFolder}/QuantumKat",
             "preLaunchTask": "dotnet: build",
             "program": "${workspaceFolder}/QuantumKat/bin/Debug/net8.0/QuantumKat.dll"
