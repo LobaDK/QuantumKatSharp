@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
 using QuantumKat.Attributes;
-using QuantumKat.Settings.Default;
+using QuantumKat.Settings.Model;
 
 namespace QuantumKat.Settings;
 
@@ -24,7 +24,7 @@ public class SettingsManager(string file)
     {
         if (!Path.Exists(_settingsFile))
         {
-            DefaultSettings settings = InitializeSettings<DefaultSettings>();
+            RootSettings settings = InitializeSettings<RootSettings>();
             Save(settings);
         }
 
