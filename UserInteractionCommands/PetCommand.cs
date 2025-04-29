@@ -1,15 +1,24 @@
 ﻿using Discord;
 using Discord.Interactions;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using QuantumKat.Extensions;
+using UserInteractionCommands.Settings.Model;
 
 namespace UserInteractionCommands;
 
-public class UserInteractions() : InteractionModuleBase<SocketInteractionContext>
+public class UserInteractions : InteractionModuleBase<SocketInteractionContext>
 {
-    // TODO: Use global configuration to avoid fields and allow "tuneable"-like modifying of values
-    private readonly string[] QuantumLocationsPlural = ["dimensions", "universes", "realities", "timelines",];
-    private readonly string[] QuantumLocationsSingular = ["dimension", "universe", "reality", "timeline",];
-    private readonly string[] PetLoopChoices = ["pet", "pat", "petting", "patting"];
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IConfiguration _configuration;
+    private readonly PetCommandSettings _settings = new();
+
+    public UserInteractions(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+        _configuration = _serviceProvider.GetRequiredService<IConfiguration>();
+        ConfigurationBinder.Bind(_configuration, _settings);
+    }
 
     [SlashCommand("pet", "Pets the specified user a random amount, with the option to specify how much.")]
     public async Task Pet(
@@ -34,7 +43,9 @@ public class UserInteractions() : InteractionModuleBase<SocketInteractionContext
             // 45%
             if (x <= 0.45)
             {
-                string QuantumLocation = amount == 1 ? QuantumLocationsSingular[random.Next(0, QuantumLocationsSingular.Length)] : QuantumLocationsPlural[random.Next(0, QuantumLocationsPlural.Length)];
+                string QuantumLocation = amount == 1 
+                    ? _settings.QuantumLocationsSingular.ElementAt(random.Next(0, _settings.QuantumLocationsSingular.Count())) 
+                    : _settings.QuantumLocationsPlural.ToList()[random.Next(0, _settings.QuantumLocationsPlural.Count())];
                 await RespondAsync($"*Quantum purrs across {amount} {QuantumLocation}*");
             }
             // 45%
@@ -51,7 +62,7 @@ public class UserInteractions() : InteractionModuleBase<SocketInteractionContext
                 List<string> PetLoopSample = [];
                 for (int i = 0; i < PetLoopAmount; i++)
                 {
-                    PetLoopSample.Add(PetLoopChoices[random.Next(PetLoopChoices.Length)]);
+                    PetLoopSample.Add(_settings.PetLoopChoices.ElementAt(random.Next(_settings.PetLoopChoices.Count())));
                 }
 
                 await RespondAsync($"Quantum Loop pet initiated trying to pet self! *{string.Join("", PetLoopSample)}*");

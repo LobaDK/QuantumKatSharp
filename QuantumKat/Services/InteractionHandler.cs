@@ -54,6 +54,17 @@ public class InteractionHandler
                     IMessageHandlerPlugin plugin = (IMessageHandlerPlugin)Activator.CreateInstance(type, _serviceProvider)!;
                     _messageHandlerPlugins.Add(plugin);
                 }
+                else if (typeof(IPluginSettings).IsAssignableFrom(type))
+                {
+                    IPluginSettings pluginSettings = (IPluginSettings)Activator.CreateInstance(type)!;
+
+                    string assemblyName = assembly.GetName().Name!;
+                    if (!_settings.Plugins.Contains(assemblyName))
+                    {
+                        pluginSettings = (IPluginSettings)pluginSettings.GetDefaultSettings();
+                        _settings.Plugins.Add(assemblyName, pluginSettings);
+                    }
+                }
             }
 
         }
