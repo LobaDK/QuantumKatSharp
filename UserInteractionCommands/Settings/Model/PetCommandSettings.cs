@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using QuantumKat.Attributes;
 using QuantumKat.Interfaces;
 using QuantumKat.Settings;
@@ -6,6 +7,9 @@ namespace UserInteractionCommands.Settings.Model;
 
 public record class PetCommandSettings : IPluginSettings
 {
+    [JsonIgnore]
+    public string EntryKey { get; } = "UserInteractionCommands";
+
     [SettingCallback(nameof(PromptForQuantumLocationsPlural))]
     public IEnumerable<string> QuantumLocationsPlural { get; set; }
 

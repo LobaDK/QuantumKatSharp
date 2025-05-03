@@ -17,7 +17,7 @@ public class UserInteractions : InteractionModuleBase<SocketInteractionContext>
     {
         _serviceProvider = serviceProvider;
         _configuration = _serviceProvider.GetRequiredService<IConfiguration>();
-        ConfigurationBinder.Bind(_configuration, _settings);
+        ConfigurationBinder.Bind(_configuration.GetSection($"plugins:{_settings.EntryKey}"), _settings);
     }
 
     [SlashCommand("pet", "Pets the specified user a random amount, with the option to specify how much.")]

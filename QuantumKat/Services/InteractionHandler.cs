@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using QuantumKat.Extensions;
 using QuantumKat.Interfaces;
+using QuantumKat.Settings;
 using QuantumKat.Settings.Model;
 
 namespace QuantumKat.Services;
@@ -37,6 +38,8 @@ public class InteractionHandler
         _client.Ready += ReadyAsync;
         _interactionService.Log += LogAsync;
 
+        SettingsManager settingsManager = new("config.ini");
+
         // TODO: Improve external DLL loading. Require use of custom interface to ensure correct structure?
         // TODO: Introduce commands or other form of control to load, unload, and reload DLLs.
         foreach (string dll in Directory.GetFiles(_settings.App.PluginPath, "*.dll"))
@@ -58,11 +61,12 @@ public class InteractionHandler
                 {
                     IPluginSettings pluginSettings = (IPluginSettings)Activator.CreateInstance(type)!;
 
-                    string assemblyName = assembly.GetName().Name!;
+                    string assemblyName = pluginSettings.EntryKey;
                     if (!_settings.Plugins.Contains(assemblyName))
                     {
                         pluginSettings = (IPluginSettings)pluginSettings.GetDefaultSettings();
                         _settings.Plugins.Add(assemblyName, pluginSettings);
+                        settingsManager.Save(_settings);
                     }
                 }
             }
