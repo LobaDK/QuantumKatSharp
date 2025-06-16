@@ -1,4 +1,4 @@
-using QuantumKat.Attributes;
+using QuantumKat.PluginSDK.Attributes;
 
 namespace QuantumKat.Settings.Model;
 

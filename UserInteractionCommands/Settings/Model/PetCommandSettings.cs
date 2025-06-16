@@ -1,14 +1,17 @@
 using System.Text.Json.Serialization;
-using QuantumKat.Attributes;
-using QuantumKat.Interfaces;
-using QuantumKat.Settings;
+using QuantumKat.PluginSDK;
+using QuantumKat.PluginSDK.Attributes;
+using QuantumKat.PluginSDK.Settings;
 
 namespace UserInteractionCommands.Settings.Model;
 
-public record class PetCommandSettings : IPluginSettings
+public record class PetCommandSettings : ISetting
 {
     [JsonIgnore]
-    public string EntryKey { get; } = "UserInteractionCommands";
+    public string SectionName { get; } = "UserInteractionCommands";
+
+    [JsonIgnore]
+    public string Version { get; } = "0.0.1";
 
     [SettingCallback(nameof(PromptForQuantumLocationsPlural))]
     public IEnumerable<string> QuantumLocationsPlural { get; set; }
@@ -26,7 +29,7 @@ public record class PetCommandSettings : IPluginSettings
 
         Console.WriteLine("Do you want to use the default plural quantum locations? (Y/n) ['dimensions', 'universes', 'realities', 'timelines']");
         ConsoleKeyInfo response = Console.ReadKey();
-        if (response.Key == ConsoleKey.Y)
+        if (response.Key == ConsoleKey.Y || response.Key == ConsoleKey.Enter)
         {
             return ["dimensions", "universes", "realities", "timelines"];
         }
@@ -51,7 +54,7 @@ public record class PetCommandSettings : IPluginSettings
 
         Console.WriteLine("Do you want to use the default singular quantum locations? (Y/n) ['dimension', 'universe', 'reality', 'timeline']");
         ConsoleKeyInfo response = Console.ReadKey();
-        if (response.Key == ConsoleKey.Y)
+        if (response.Key == ConsoleKey.Y || response.Key == ConsoleKey.Enter)
         {
             return ["dimension", "universe", "reality", "timeline"];
         }
@@ -76,7 +79,7 @@ public record class PetCommandSettings : IPluginSettings
 
         Console.WriteLine("Do you want to use the default pet loop choices? (Y/n) ['pet', 'pat', 'petting', 'patting']");
         ConsoleKeyInfo response = Console.ReadKey();
-        if (response.Key == ConsoleKey.Y)
+        if (response.Key == ConsoleKey.Y || response.Key == ConsoleKey.Enter)
         {
             return ["pet", "pat", "petting", "patting"];
         }

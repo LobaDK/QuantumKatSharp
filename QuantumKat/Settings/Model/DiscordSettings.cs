@@ -1,11 +1,11 @@
-using QuantumKat.Attributes;
+using QuantumKat.PluginSDK.Attributes;
 
 namespace QuantumKat.Settings.Model;
 
 public record class DiscordSettings
 {
     [SettingCallback(nameof(PromptForGuildsToSyncTo))]
-    public IEnumerable<string> GuildsToSyncTo { get; set; }
+    public IEnumerable<string> GuildsToSyncTo { get; set; } = [];
 
     public static IEnumerable<string> PromptForGuildsToSyncTo()
     {

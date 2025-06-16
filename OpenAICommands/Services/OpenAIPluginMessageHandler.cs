@@ -1,12 +1,13 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using QuantumKat.Interfaces;
 using System.Text.RegularExpressions;
+using QuantumKat.PluginSDK.Discord;
+using QuantumKat.PluginSDK.Discord.Extensions;
 
 namespace OpenAICommands.Services;
 
-public class OpenAIPluginMessageHandler : IMessageHandlerPlugin
+public class OpenAIPluginMessageHandler : IOnMessageEvent
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly DiscordSocketClient _client;
@@ -17,14 +18,22 @@ public class OpenAIPluginMessageHandler : IMessageHandlerPlugin
         _client = _serviceProvider.GetRequiredService<DiscordSocketClient>();
     }
 
-    public async Task HandleMessageAsync(SocketUserMessage message, int argPos)
+    public async Task HandleMessageAsync(SocketMessage message)
     {
-        // Catches messages that start with "hey quantumkat" or "hey @quantumkat"
-        // including comma and space variations.
-        string pattern = $@"^hey[, ]+(quantumkat|<@{_client.CurrentUser.Id}>)";
-        if (Regex.IsMatch(message.Content, pattern, RegexOptions.IgnoreCase))
+        if (message.IsFromBot())
         {
-            await message.ReplyAsync("Hello!");
+            return;
+        }
+
+        if (message.IsUserMessage(out SocketUserMessage userMessage))
+        {
+            // Catches messages that start with "hey quantumkat" or "hey @quantumkat"
+            // including comma and space variations.
+            string pattern = $@"^hey[, ]+(quantumkat|<@{_client.CurrentUser.Id}>)";
+            if (Regex.IsMatch(message.Content, pattern, RegexOptions.IgnoreCase))
+            {
+                await userMessage.ReplyAsync("Hello!");
+            }
         }
     }
 }

@@ -5,10 +5,10 @@ using Microsoft.Extensions.DependencyInjection;
 using QuantumKat.Utitlity;
 using QuantumKat.Services;
 using Discord.Commands;
-using QuantumKat.Extensions;
 using Microsoft.Extensions.Configuration;
-using QuantumKat.Settings;
 using QuantumKat.Settings.Model;
+using QuantumKat.PluginSDK.Settings;
+using QuantumKat.PluginSDK.Discord.Extensions;
 
 namespace QuantumKat;
 
@@ -17,7 +17,7 @@ class Program
     public static async Task Main(string[] args)
     {
         SettingsManager settingsManager = new("config.ini");
-        IConfiguration configuration = settingsManager.GetConfiguration();
+        IConfiguration configuration = settingsManager.GetConfiguration<RootSettings>();
 
         RootSettings settings = new();
         ConfigurationBinder.Bind(configuration, settings);
@@ -59,7 +59,7 @@ class Program
         ServiceProvider services = serviceCollection.BuildServiceProvider();
 
         await services.GetRequiredService<InteractionHandler>().InitializeAsync();
-        DiscordUser.Initialize(client);
+        DiscordUserExtensions.Initialize(client);
 
         string bot_mode = Environment.GetEnvironmentVariable("TOKEN_TYPE") ?? "main";
         await client.LoginAsync(TokenType.Bot, await new TokenLoader(bot_mode).LoadWith1Password());

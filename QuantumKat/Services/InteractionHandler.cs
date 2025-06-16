@@ -5,10 +5,11 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using QuantumKat.Extensions;
-using QuantumKat.Interfaces;
-using QuantumKat.Settings;
 using QuantumKat.Settings.Model;
+using QuantumKat.PluginSDK.Discord;
+using QuantumKat.PluginSDK.Settings;
+using QuantumKat.PluginSDK;
+using QuantumKat.PluginSDK.Discord.Extensions;
 
 namespace QuantumKat.Services;
 
@@ -31,7 +32,7 @@ public class InteractionHandler
         ConfigurationBinder.Bind(_configuration, _settings);
     }
 
-    private readonly List<IMessageHandlerPlugin> _messageHandlerPlugins = [];
+    private readonly List<IOnMessageEvent> _messageHandlerPlugins = [];
 
     public async Task InitializeAsync()
     {
@@ -52,19 +53,19 @@ public class InteractionHandler
             Assembly assembly = Assembly.LoadFrom(dll);
             foreach(Type type in assembly.GetTypes())
             {
-                if (typeof(IMessageHandlerPlugin).IsAssignableFrom(type))
+                if (typeof(IOnMessageEvent).IsAssignableFrom(type))
                 {
-                    IMessageHandlerPlugin plugin = (IMessageHandlerPlugin)Activator.CreateInstance(type, _serviceProvider)!;
+                    IOnMessageEvent plugin = (IOnMessageEvent)Activator.CreateInstance(type, _serviceProvider)!;
                     _messageHandlerPlugins.Add(plugin);
                 }
-                else if (typeof(IPluginSettings).IsAssignableFrom(type))
+                else if (typeof(ISetting).IsAssignableFrom(type))
                 {
-                    IPluginSettings pluginSettings = (IPluginSettings)Activator.CreateInstance(type)!;
+                    ISetting pluginSettings = (ISetting)Activator.CreateInstance(type)!;
 
-                    string assemblyName = pluginSettings.EntryKey;
+                    string assemblyName = pluginSettings.SectionName;
                     if (!_settings.Plugins.Contains(assemblyName))
                     {
-                        pluginSettings = (IPluginSettings)pluginSettings.GetDefaultSettings();
+                        pluginSettings = (ISetting)pluginSettings.GetDefaultSettings();
                         _settings.Plugins.Add(assemblyName, pluginSettings);
                         settingsManager.Save(_settings);
                     }
@@ -139,10 +140,10 @@ public class InteractionHandler
 
         int argPos = 0;
 
-        // Notify any plugins that implemented the IMessageHandlerPlugin interface
-        foreach (IMessageHandlerPlugin plugin in _messageHandlerPlugins)
+        // Notify any plugins that implemented the IOnMessageEvent interface
+        foreach (IOnMessageEvent plugin in _messageHandlerPlugins)
         {
-            await plugin.HandleMessageAsync(message, argPos);
+            await plugin.HandleMessageAsync(message);
         }
 
         // Ignore messages that don't start with the command prefix or are from bots

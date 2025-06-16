@@ -5,12 +5,19 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\QuantumKat\QuantumKat.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Update="SystemPlugin.dll">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="QuantumKat.PluginSDK">
+      <HintPath>/home/lobadk/Documents/QuantumKatSharpPluginSDK/QuantumKat.PluginSDK/bin/Debug/net8.0/QuantumKat.PluginSDK.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Discord.Net" Version="3.17.4" />
   </ItemGroup>
 </Project>

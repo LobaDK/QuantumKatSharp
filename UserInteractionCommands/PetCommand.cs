@@ -2,8 +2,9 @@
 using Discord.Interactions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using QuantumKat.Extensions;
+using QuantumKat.PluginSDK.Discord.Extensions;
 using UserInteractionCommands.Settings.Model;
+
 
 namespace UserInteractionCommands;
 
@@ -17,7 +18,7 @@ public class UserInteractions : InteractionModuleBase<SocketInteractionContext>
     {
         _serviceProvider = serviceProvider;
         _configuration = _serviceProvider.GetRequiredService<IConfiguration>();
-        ConfigurationBinder.Bind(_configuration.GetSection($"plugins:{_settings.EntryKey}"), _settings);
+        ConfigurationBinder.Bind(_configuration.GetSection($"plugins:{_settings.SectionName}"), _settings);
     }
 
     [SlashCommand("pet", "Pets the specified user a random amount, with the option to specify how much.")]
@@ -29,7 +30,7 @@ public class UserInteractions : InteractionModuleBase<SocketInteractionContext>
         int amount = 0)
     {
         Random random = new();
-        
+
         if (amount == 0)
         {
             amount = random.Next(1, 100);
@@ -43,8 +44,8 @@ public class UserInteractions : InteractionModuleBase<SocketInteractionContext>
             // 45%
             if (x <= 0.45)
             {
-                string QuantumLocation = amount == 1 
-                    ? _settings.QuantumLocationsSingular.ElementAt(random.Next(0, _settings.QuantumLocationsSingular.Count())) 
+                string QuantumLocation = amount == 1
+                    ? _settings.QuantumLocationsSingular.ElementAt(random.Next(0, _settings.QuantumLocationsSingular.Count()))
                     : _settings.QuantumLocationsPlural.ToList()[random.Next(0, _settings.QuantumLocationsPlural.Count())];
                 await RespondAsync($"*Quantum purrs across {amount} {QuantumLocation}*");
             }
